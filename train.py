@@ -8,6 +8,7 @@
 MODEL = "bigcode/starcoderbase-1b"  # Model checkpoint on the Hugging Face Hub
 DATASET = "cy948/ksdoc-airscript" 
 DATA_COLUMN = "code"  # Column name containing the code content
+VALID_LENGTH = 30  # Number of validation examples
 
 SEQ_LENGTH = 2048  # Sequence length
 
@@ -76,8 +77,8 @@ dataset = load_dataset(
     streaming=True,
 )
 
-valid_data = dataset.take(10)
-train_data = dataset.skip(10)
+valid_data = dataset.take(VALID_LENGTH)
+train_data = dataset.skip(VALID_LENGTH)
 train_data = train_data.shuffle(buffer_size=5000, seed=SEED)
 
 # %% [markdown]
