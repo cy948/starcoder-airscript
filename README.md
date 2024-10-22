@@ -55,4 +55,12 @@ function test() {
 
 We train our model in these setup
 
-- 
+- Install conda 
+
+```sh
+# Install conda env
+wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py312_24.4.0-0-Linux-x86_64.sh
+chmod +x Miniconda3-py312_24.4.0-0-Linux-x86_64.sh
+```
+
+- Install torch on https://pytorch.org/get-started/locally/
