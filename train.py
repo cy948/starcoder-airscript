@@ -410,5 +410,6 @@ trainer = Trainer(model=model, args=training_args, train_dataset=train_dataset, 
 
 print("Training...")
 trainer.train()
+trainer.push_to_hub()
 
 
