@@ -2,4 +2,3 @@ transformers
 datasets
 peft
 bitsandbytes
-flash-attn

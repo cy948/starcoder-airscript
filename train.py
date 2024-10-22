@@ -60,6 +60,7 @@ set_seed(SEED)
 MAX_STEPS = 2000
 BATCH_SIZE = 8
 GR_ACC_STEPS = 2
+USE_FLASH_ATTENTION = False
 
 # %% [markdown]
 # # Data preparation
@@ -68,7 +69,6 @@ GR_ACC_STEPS = 2
 from datasets import load_dataset
 import torch
 from tqdm import tqdm
-
 
 dataset = load_dataset(
     DATASET,
@@ -100,8 +100,13 @@ def chars_token_ratio(dataset, tokenizer, data_column, nb_examples=400):
     return total_characters / total_tokens
 
 
-chars_per_token = chars_token_ratio(train_data, tokenizer, DATA_COLUMN)
+chars_per_token = chars_token_ratio(iter(train_data), tokenizer, DATA_COLUMN)
 print(f"The character to token ratio of the dataset is: {chars_per_token:.2f}")
+
+# tokenized example
+example = list(train_data.take(1))[0]
+example = tokenizer.tokenize(example[DATA_COLUMN])
+print(f"Tokenized example: {example}")
 
 import functools
 import numpy as np
@@ -354,7 +359,7 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map=device_map,
     use_cache=False,  # We will be using gradient checkpointing
     trust_remote_code=True,
-    use_flash_attention_2=True,
+    use_flash_attention_2=USE_FLASH_ATTENTION,
 )
 model = prepare_model_for_kbit_training(model)
 
