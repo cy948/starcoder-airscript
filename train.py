@@ -57,7 +57,7 @@ set_seed(SEED)
 
 # %%
 # Additon setup for 4060
-MAX_STEPS = 2000
+MAX_STEPS = 2000 * 0.8 # 1600 steps enough
 BATCH_SIZE = 8
 GR_ACC_STEPS = 2
 USE_FLASH_ATTENTION = False
