@@ -1,4 +1,5 @@
 # AirScript Coder
+> If you interest in model model training, refer to [reproduce section](#Reproduction) for guide.
 
 ## Introduction
 
@@ -9,6 +10,13 @@ Large model have achieve remarkable in multiple application fields, enabling non
 [AirScript](https://airsheet.wps.cn/docs/guide/summary.html) is a script to allow user manipulate WPS office files with programming interfaces. Our survey shows a lot of non-professional user are needed to programming on this script. After talking to some user, we found that, the non-professional user are leak of coding experience and they don't know how to guide a generic code LLM to write these codes.
 
 To bridge the gap, we fine-tune a code model named `starcoder-airscript` to improve its zero-shot ability on AirScript, to help those non-profession user to write AirScript better.
+
+### Task description
+
+Our task is a sequence to sequence like given a prompt or a code snapshot to instruct the model complete the code. So, the abilities should include:
+
+- **Instruction following**: Follow the instruction to generation codes.
+- **Fill In Middle(FIM)**: To predict the middle tokens between a prefix and a suffix (very useful for software development add-ons like in VS Code);
 
 ### Model Architecture
 
@@ -54,7 +62,7 @@ Some survey classified PEFT into three paradigm:
 1. Additive
 Introduce only a minimal number of trainable parameters that are strategically positioned within the model architecture.
 
-![](docs/figures/pert_adapter_layer.png) ![](docs/figures/perf_adapter.png)
+![](docs/figures/pert_adapter_layer.png) ![](docs/figures/perf_adapter.png) 
 
 $$
 Adapter(x) = W_{up} \delta(W_{down} x) + x.
@@ -83,24 +91,35 @@ Constructing a low-rank parameterization.
 
 $$
 \begin{align}
-h_{out} &= W_0 h_{in} + \frac{a}r \Delta W h_{in} \\
-&= W_0 h_{in} + \frac{a}r W_{up} W_{down} h_{in}
+h_{out} &= W_0 h_{in} + \frac{\alpha}r \Delta W h_{in} \\
+&= W_0 h_{in} + \frac{\alpha}r W_{up} W_{down} h_{in}
 \end{align}
 $$
 
 - $W_0 \in \R^{d \times k}$ : pre-trained matrix
 - $W_{up} \in \R^{d \times r}, W_{down} \in \R^{r \times k}, r \ll \min(d,k)$ : trainable matrices
 - $h_{in}, h_{out}$ : input, output
+- $\alpha$ : hyperparameter
 
-Hybird
+### AdaLoRA
 
-### LoRA
+We choose a LoRA variant AdaLoRA as a fine-tuning method in our project. After applying AdaLoRA, we could get these benefits:
 
-After applying LoRA, less than 1% of parameter to be trained.
+- Low Computational cost: less than 1% of parameter to be trained.
+- Low Storage cost: < 34MB ( 0.7% of 4.5GB )
 
-| trainable params | all params | trainable% |
-|--|--|--|
-| 5,554,176 | 1,142,761,472 | 0.4860 |
+| trainable params | all params | trainable% | tensor size |
+|--|--|--|--|
+| 8,332,416  | 1,145,539,808 | 0.7274 | < 34 MB |
+
+### Fill In Middle, FIM
+
+We apply some transformations on dataset to improve model's FIM performance. Our strategy:
+
+- Perform FIM randomly (50%)
+- Choose FIM methods randomly (50% to PSM, 50% to SPM)
+
+> Why FIM refer to [arxiv.org | 2207.14255](https://arxiv.org/pdf/2207.14255)
 
 ## Reproduction
 
@@ -134,3 +153,20 @@ chmod +x Miniconda3-py312_24.4.0-0-Linux-x86_64.sh
 
 - Install torch on https://pytorch.org/get-started/locally/
 
+- Install deps with `requirements.txt`
+
+```python
+pip install -r requirements.txt
+```
+
+- [Login to huggingface](https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#huggingface-cli-login)
+
+```sh
+huggingface-cli login
+```
+
+- Start training
+
+```python
+python train.py
+```
