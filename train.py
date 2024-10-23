@@ -69,7 +69,7 @@ set_seed(SEED)
 
 # %%
 # Setup for 4090 to reducing the memory usage
-BATCH_SIZE = 8
+BATCH_SIZE = 10
 GR_ACC_STEPS = 2
 USE_FLASH_ATTENTION = False
 
