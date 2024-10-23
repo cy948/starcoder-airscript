@@ -82,6 +82,7 @@ FIM_SPM_RATE = 0.5
 
 # Training after these steps, the loss will reduced slowly
 MAX_STEPS = 2000
+VALID_LENGTH = int(4400 * 0.1)
 
 # %% [markdown]
 # # Data preparation
