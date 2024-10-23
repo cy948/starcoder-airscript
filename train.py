@@ -56,11 +56,12 @@ from transformers import (
 set_seed(SEED)
 
 # %%
-# Additon setup for 4060
+# Additon setup for 4090
 MAX_STEPS = 2000 * 0.8 # 1600 steps enough
 BATCH_SIZE = 8
 GR_ACC_STEPS = 2
 USE_FLASH_ATTENTION = False
+LORA_DROPOUT = 0.1
 
 # %% [markdown]
 # # Data preparation
