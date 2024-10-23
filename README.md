@@ -12,7 +12,7 @@ To bridge the gap, we fine-tune a code model named `starcoder-airscript` to impr
 
 ### Model Architecture
 
-The base model is [Starcoderbase-1b](https://huggingface.co/bigcode/starcoderbase-1b) which base on GPT-2 model with multi-query attention and Fill-in-the-Middle objective. The details of base model can refer to [2305.06161 | arxiv.org](https://arxiv.org/abs/2305.06161).
+The base model [Starcoderbase-1b](https://huggingface.co/bigcode/starcoderbase-1b) is a GPT-2 model with multi-query attention and Fill-in-the-Middle objective. The details of base model can refer to [2305.06161 | arxiv.org](https://arxiv.org/abs/2305.06161).
 
 ## Dataset
 
@@ -26,7 +26,7 @@ The base model is [Starcoderbase-1b](https://huggingface.co/bigcode/starcoderbas
 
 ### Human Annotation Example
 
-We invite some domain experts who has code experience on AirScript to add annotations for the code example form document site in lines. For example:
+We invite some domain experts who has code experience on AirScript to add annotations for the code snippets in lines. For example:
 
 ```diff
 /*本示例判断如果活动工作表上区域 B1:B10 中第二个（AboveAverage）条件格式的类型为xlAboveAverageCondition，则删除该条件格式。*/
@@ -49,9 +49,58 @@ function test() {
 
 Large model consist a vast amount of parameter to adjust cause the adaptions of downstream are computationally expensive and time consuming. A widely strategy for fine-tuning is adjusting a limited number of LLM parameters while keeping the remainder "freezed". So we using PEFT algorithm to fine-tuning the model in a budget friendly and efficiency way.
 
-### LoRa
+Some survey classified PEFT into three paradigm:
 
+1. Additive
+Introduce only a minimal number of trainable parameters that are strategically positioned within the model architecture.
 
+![](docs/figures/pert_adapter_layer.png) ![](docs/figures/perf_adapter.png)
+
+$$
+Adapter(x) = W_{up} \delta(W_{down} x) + x.
+$$
+
+2. Selective
+
+Mask some parameters 
+
+![](docs/figures/perf_selective_mask.png)
+
+$$
+\theta_i^{'} = \theta_i - \eta \cdot m_i \cdot \frac{\partial L}{\partial \theta_i}
+$$
+
+- $\theta$ model parameter
+- $\eta$ learn rete
+- $m_i$ mask, either 0 or 1
+- $\frac{\partial L}{\partial \theta_i}$ gradient of $\theta_i$
+
+3. Reparameterized
+
+Constructing a low-rank parameterization.
+
+![](docs/figures/perf_reparameterize.png)
+
+$$
+\begin{align}
+h_{out} &= W_0 h_{in} + \frac{a}r \Delta W h_{in} \\
+&= W_0 h_{in} + \frac{a}r W_{up} W_{down} h_{in}
+\end{align}
+$$
+
+- $W_0 \in \R^{d \times k}$ : pre-trained matrix
+- $W_{up} \in \R^{d \times r}, W_{down} \in \R^{r \times k}, r \ll \min(d,k)$ : trainable matrices
+- $h_{in}, h_{out}$ : input, output
+
+Hybird
+
+### LoRA
+
+After applying LoRA, less than 1% of parameter to be trained.
+
+| trainable params | all params | trainable% |
+|--|--|--|
+| 5,554,176 | 1,142,761,472 | 0.4860 |
 
 ## Reproduction
 
