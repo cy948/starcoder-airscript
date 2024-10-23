@@ -4,6 +4,9 @@
 # %% [markdown]
 # ## Project setup
 
+# %% [markdown]
+# ### Default Settings
+
 # %%
 MODEL = "bigcode/starcoderbase-1b"  # Model checkpoint on the Hugging Face Hub
 DATASET = "cy948/ksdoc-airscript" 
@@ -55,13 +58,30 @@ from transformers import (
 
 set_seed(SEED)
 
+# %% [markdown]
+# ### Additional Train setting
+# 
+# This settings for 2 proposes:
+# 
+# - Fit the hardware;
+# - Optimize the hyperparameter;
+# - Training threshold;
+
 # %%
-# Additon setup for 4090
-MAX_STEPS = 2000 * 0.8 # 1600 steps enough
+# Setup for 4090 to reducing the memory usage
 BATCH_SIZE = 8
 GR_ACC_STEPS = 2
 USE_FLASH_ATTENTION = False
-LORA_DROPOUT = 0.1
+
+# Hyper parameters
+LORA_R = 8
+LORA_ALPHA = 32
+
+FIM_RATE = 0.5
+FIM_SPM_RATE = 0.5
+
+# Training after these steps, the loss will reduced slowly
+MAX_STEPS = 2000
 
 # %% [markdown]
 # # Data preparation
@@ -335,7 +355,7 @@ eval_dataset = ConstantLengthDataset(
 # ## Prepare the model
 
 # %%
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, AdaLoraConfig
 from peft.tuners.lora import LoraLayer
 
 load_in_8bit = False
@@ -350,14 +370,10 @@ bnb_config = BitsAndBytesConfig(
     bnb_4bit_use_double_quant=USE_NESTED_QUANT,
 )
 
-# Use single GPU
-device_map = {"": 0}
-
 model = AutoModelForCausalLM.from_pretrained(
     MODEL,
     load_in_8bit=load_in_8bit,
     quantization_config=bnb_config,
-    device_map=device_map,
     use_cache=False,  # We will be using gradient checkpointing
     trust_remote_code=True,
     use_flash_attention_2=USE_FLASH_ATTENTION,
@@ -365,7 +381,7 @@ model = AutoModelForCausalLM.from_pretrained(
 model = prepare_model_for_kbit_training(model)
 
 # Set up lora
-peft_config = LoraConfig(
+peft_config = AdaLoraConfig(
     lora_alpha=LORA_ALPHA,
     lora_dropout=LORA_DROPOUT,
     r=LORA_R,
