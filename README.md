@@ -36,6 +36,8 @@ The base model [Starcoderbase-1b](https://huggingface.co/bigcode/starcoderbase-1
 
 We invite some domain experts who has code experience on AirScript to add annotations for the code snippets in lines. For example:
 
+- Data annotation example
+
 ```diff
 /*本示例判断如果活动工作表上区域 B1:B10 中第二个（AboveAverage）条件格式的类型为xlAboveAverageCondition，则删除该条件格式。*/
 function test() {
@@ -48,6 +50,34 @@ function test() {
     }
 }
 ```
+
+- Data imputation example
+
+Source document
+
+```
+XlAboveBelow 枚举​
+指定值是高于还是低于平均值。
+
+名称	值	说明
+XlAboveAverage	0	高于平均值。
+XlAboveStdDev	1	高于标准偏差。
+```
+
+We transform the table into typescript `enum` using LLM with prompt instruction.
+
+```ts
+/**
+ * XlAboveBelow 枚举，指定值是高于还是低于平均值。
+ */
+enum XlAboveBelow {
+  // 高于平均值。
+  XlAboveAverage = 0,
+  // 高于标准偏差。
+  XlAboveStdDev = 1,
+}
+```
+
 
 ## Training
 
