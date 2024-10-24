@@ -46,6 +46,8 @@ BNB_4BIT_COMPUTE_DTYPE = "bfloat16"  # bnb_4bit_compute_dtype
 
 SEED = 0
 
+ENABLE_TENSOR_BOARD = False
+
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -83,6 +85,9 @@ FIM_SPM_RATE = 0.5
 # Training after these steps, the loss will reduced slowly
 MAX_STEPS = int(2000 * 0.85)
 VALID_LENGTH = int(4400 * 0.1)
+
+# Set false if no tensorboard installed
+ENABLE_TENSOR_BOARD = True
 
 # %% [markdown]
 # # Data preparation
@@ -400,7 +405,6 @@ model.print_trainable_parameters()
 # %%
 train_data.start_iteration = 0
 
-
 training_args = TrainingArguments(
     output_dir=f"model/cy948/{OUTPUT_DIR}",
     dataloader_drop_last=True,
@@ -422,7 +426,8 @@ training_args = TrainingArguments(
     weight_decay=WEIGHT_DECAY,
     include_tokens_per_second=True,
     push_to_hub=True,
-    logging_dir='./logs'
+    logging_dir='./logs',
+    report_to=['tensorboard'] if ENABLE_TENSOR_BOARD else None,
 )
 
 trainer = Trainer(model=model, args=training_args, train_dataset=train_dataset, eval_dataset=eval_dataset)
