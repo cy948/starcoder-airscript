@@ -74,14 +74,14 @@ GR_ACC_STEPS = 2
 USE_FLASH_ATTENTION = False
 
 # Hyper parameters
-LORA_R = 8
+LORA_R = 12
 LORA_ALPHA = 32
 
 FIM_RATE = 0.5
 FIM_SPM_RATE = 0.5
 
 # Training after these steps, the loss will reduced slowly
-MAX_STEPS = 2000
+MAX_STEPS = int(2000 * 0.85)
 VALID_LENGTH = int(4400 * 0.1)
 
 # %% [markdown]
