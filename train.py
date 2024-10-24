@@ -421,7 +421,8 @@ training_args = TrainingArguments(
     bf16=BF16,
     weight_decay=WEIGHT_DECAY,
     include_tokens_per_second=True,
-    push_to_hub=True
+    push_to_hub=True,
+    logging_dir='./logs'
 )
 
 trainer = Trainer(model=model, args=training_args, train_dataset=train_dataset, eval_dataset=eval_dataset)
